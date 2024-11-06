@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 **Task description**
-A clear and concise description of the goal of this task. Ex. 
+A clear and concise description of the goal of this task. Ex. "Update task issue template with an example."
 
 **Implementation details**
 A clear and concise description of how you intend to make this happen.
