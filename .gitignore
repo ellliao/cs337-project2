@@ -1,2 +1,5 @@
 # Ignore GitHub files
 .github/*
+
+# Ignore pycache files
+__pycache__/*
