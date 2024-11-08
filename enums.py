@@ -1,9 +1,16 @@
 from enum import Enum, auto
+import re
 
 # Enum of recipe sources
 class RecipeSource(Enum):
     UNKNOWN = auto()
     ALLRECIPES = auto()
+
+    @classmethod
+    def from_url(url: str):
+        if re.findall(r'allrecipes\.com/recipe/.*', url):
+            return RecipeSource.ALLRECIPES
+        return RecipeSource.UNKNOWN
 
 # Enum of relevant HTML tag types
 class HTMLTag(Enum):
