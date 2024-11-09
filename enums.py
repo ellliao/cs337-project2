@@ -1,19 +1,19 @@
 from enum import Enum, auto
 import re
 
-# Enum of recipe sources
 class RecipeSource(Enum):
+    '''Enum of recipe sources'''
     UNKNOWN = auto()
     ALLRECIPES = auto()
 
     @classmethod
-    def from_url(url: str):
+    def from_url(cls, url: str):
         if re.findall(r'allrecipes\.com/recipe/.*', url):
-            return RecipeSource.ALLRECIPES
-        return RecipeSource.UNKNOWN
+            return cls.ALLRECIPES
+        return cls.UNKNOWN
 
-# Enum of relevant HTML tag types
 class HTMLTag(Enum):
+    '''Enum of relevant HTML tag types'''
     UNKNOWN = auto()
     OVERVIEW_LABEL = auto()
     OVERVIEW_TEXT = auto()
@@ -24,30 +24,30 @@ class HTMLTag(Enum):
     STEP = auto()
 
     @classmethod
-    def from_allrecipes_tag(cls, tag: str, attrs: list[tuple[str, str | None]]):
+    def __from_allrecipes_tag(cls, tag: str, attrs: list[tuple[str, str | None]]):
         if tag == 'div':
             if attrs == [('class', 'mm-recipes-details__label')]:
-                return HTMLTag.OVERVIEW_LABEL
+                return cls.OVERVIEW_LABEL
             elif attrs == [('class', 'mm-recipes-details__value')]:
-                return HTMLTag.OVERVIEW_TEXT
+                return cls.OVERVIEW_TEXT
         elif tag == 'li':
             if ('class', 'mm-recipes-structured-ingredients__list-item ') in attrs:
-                return HTMLTag.INGREDIENT
+                return cls.INGREDIENT
         elif tag == 'span':
             if attrs == [('data-ingredient-quantity', 'true')]:
-                return HTMLTag.INGREDIENT_QUANTITY
+                return cls.INGREDIENT_QUANTITY
             elif attrs == [('data-ingredient-unit', 'true')]:
-                return HTMLTag.INGREDIENT_UNIT
+                return cls.INGREDIENT_UNIT
             elif attrs == [('data-ingredient-name', 'true')]:
-                return HTMLTag.INGREDIENT_NAME
+                return cls.INGREDIENT_NAME
         elif tag == 'p':
             if ('class', 'comp mntl-sc-block mntl-sc-block-html') in attrs:
-                return HTMLTag.STEP
-        return HTMLTag.UNKNOWN
+                return cls.STEP
+        return cls.UNKNOWN
 
     @classmethod
     def from_tag(cls, source: RecipeSource, tag: str, attrs: list[tuple[str, str | None]]):
         match source:
             case RecipeSource.ALLRECIPES:
-                return cls.from_allrecipes_tag(tag, attrs)
-        return HTMLTag.UNKNOWN
+                return cls.__from_allrecipes_tag(tag, attrs)
+        return cls.UNKNOWN
