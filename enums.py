@@ -15,6 +15,7 @@ class RecipeSource(Enum):
 class HTMLTag(Enum):
     '''Enum of relevant HTML tag types'''
     UNKNOWN = auto()
+    TITLE = auto()
     OVERVIEW_LABEL = auto()
     OVERVIEW_TEXT = auto()
     INGREDIENT = auto()
@@ -25,7 +26,10 @@ class HTMLTag(Enum):
 
     @classmethod
     def __from_allrecipes_tag(cls, tag: str, attrs: list[tuple[str, str | None]]):
-        if tag == 'div':
+        if tag == 'h1':
+            if attrs == [('class', 'article-heading text-headline-400')]:
+                return HTMLTag.TITLE
+        elif tag == 'div':
             if attrs == [('class', 'mm-recipes-details__label')]:
                 return HTMLTag.OVERVIEW_LABEL
             elif attrs == [('class', 'mm-recipes-details__value')]:
