@@ -18,10 +18,12 @@ class HTMLTag(Enum):
     TITLE = auto()
     OVERVIEW_LABEL = auto()
     OVERVIEW_TEXT = auto()
+    INGREDIENTS_LIST = auto()
     INGREDIENT = auto()
     INGREDIENT_QUANTITY = auto()
     INGREDIENT_UNIT = auto()
     INGREDIENT_NAME = auto()
+    STEPS_LIST = auto()
     STEP = auto()
 
     @classmethod
@@ -34,6 +36,12 @@ class HTMLTag(Enum):
                 return HTMLTag.OVERVIEW_LABEL
             elif attrs == [('class', 'mm-recipes-details__value')]:
                 return HTMLTag.OVERVIEW_TEXT
+            elif ('class', 'comp mm-recipes-steps mntl-block') \
+                    in attrs:
+                return HTMLTag.STEPS_LIST
+        elif tag == 'ul':
+            if ('class', 'mm-recipes-structured-ingredients__list') in attrs:
+                return HTMLTag.INGREDIENTS_LIST
         elif tag == 'li':
             if ('class', 'mm-recipes-structured-ingredients__list-item ') in attrs:
                 return HTMLTag.INGREDIENT
