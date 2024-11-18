@@ -63,3 +63,8 @@ class HTMLTag(Enum):
             case RecipeSource.ALLRECIPES:
                 return HTMLTag.__from_allrecipes_tag(tag, attrs)
         return HTMLTag.UNKNOWN
+
+class NounType(Enum):
+    '''Enum of relevant noun types'''
+    UNKNOWN = auto()
+    TOOL = auto()
