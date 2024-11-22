@@ -1,11 +1,18 @@
 '''Utility enums and functions for recipe parsing and display.'''
 
 import re
+import spacy
 import unicodedata
 
 from enum import Enum, auto
 from fractions import Fraction
 from nltk.corpus import wordnet as wn
+
+#############
+# VARIABLES #
+#############
+
+nlp = spacy.load("en_core_web_md")
 
 #########
 # ENUMS #
@@ -79,18 +86,34 @@ class HTMLTag(Enum):
 class NounType(Enum):
     '''Enum of relevant noun types'''
     UNKNOWN = auto()
+    FOOD = auto()
+    MEASURE = auto()
+    TEMPERATURE = auto()
     TOOL = auto()
 
     @classmethod
     def from_str(cls, noun: str):
+        ntypes = []
         sets = wn.synsets(noun, wn.NOUN)
         for s in sets:
             for ss in s.hypernym_paths():
-                if wn.synset('kitchen_utensil.n.01') in ss or \
+                if (wn.synset('kitchen_utensil.n.01') in ss or \
                     wn.synset('kitchen_appliance.n.01') in ss or \
-                    wn.synset('container.n.01') in ss:
-                    return NounType.TOOL
-        return NounType.UNKNOWN
+                    wn.synset('container.n.01') in ss) and \
+                        NounType.TOOL not in ntypes:
+                    ntypes.append(NounType.TOOL)
+                elif wn.synset('measure.n.02') in ss and \
+                NounType.MEASURE not in ntypes:
+                    ntypes.append(NounType.MEASURE)
+                elif wn.synset('food.n.01') in ss and \
+                NounType.FOOD not in ntypes:
+                    ntypes.append(NounType.FOOD)
+                elif (wn.synset('temperature.n.01') in ss or \
+                      wn.synset('fire.n.03') in ss or \
+                      wn.synset('temperature_unit.n.01') in ss) and \
+                      NounType.TEMPERATURE not in ntypes:
+                    ntypes.append(NounType.TEMPERATURE)
+        return ntypes
 
 #############
 # FUNCTIONS #
