@@ -23,13 +23,16 @@ class RecipeSource(Enum):
     UNKNOWN = auto()
     ALLRECIPES = auto()
     SERIOUSEATS = auto()
+    EPICURIOUS = auto()
 
     @classmethod
     def from_url(cls, url: str):
         if re.findall(r'allrecipes\.com/recipe/.*', url):
             return RecipeSource.ALLRECIPES
-        elif re.findall(r'seriouseats.com/.*recipe', url):
+        elif re.findall(r'seriouseats\.com/.*recipe', url):
             return RecipeSource.SERIOUSEATS
+        elif re.findall(r'epicurious\.com/recipes/.*', url):
+            return RecipeSource.EPICURIOUS
         return RecipeSource.UNKNOWN
 
 class HTMLTag(Enum):
@@ -108,6 +111,31 @@ class HTMLTag(Enum):
             if ('class', 'comp mntl-sc-block mntl-sc-block-html') in attrs:
                 return HTMLTag.STEP
         return HTMLTag.UNKNOWN
+    
+    @classmethod
+    def __from_epicurious_tag(cls, tag: str,
+                              attrs: list[tuple[str, str | None]]):
+        if tag == 'h1':
+            if ('data-testid', 'ContentHeaderHed') in attrs:
+                return HTMLTag.TITLE
+        elif tag == 'p':
+            if attrs == [('class', 'BaseWrap-sc-gjQpdd BaseText-ewhhUZ'
+                          ' InfoSliceKey-gHIvng iUEiRd dWUQxN hykkRA')]:
+                return HTMLTag.OVERVIEW_LABEL
+            elif attrs == [('class', 'BaseWrap-sc-gjQpdd BaseText-ewhhUZ'
+                            ' InfoSliceValue-tfmqg iUEiRd bbekcU fkSlPp')]:
+                return HTMLTag.OVERVIEW_TEXT
+            else:
+                return HTMLTag.STEP
+        elif tag == 'div':
+            if ('data-testid', 'IngredientList') in attrs:
+                return HTMLTag.INGREDIENTS_LIST
+            elif attrs == [('class', 'BaseWrap-sc-gjQpdd BaseText-ewhhUZ'
+                            ' Description-cSrMCf iUEiRd bGCtOd fsKnGI')]:
+                return HTMLTag.INGREDIENT_NAME
+            elif ('data-testid', 'InstructionsWrapper') in attrs:
+                return HTMLTag.STEPS_LIST
+        return HTMLTag.UNKNOWN
 
     @classmethod
     def from_tag(cls, source: RecipeSource, tag: str,
@@ -117,6 +145,8 @@ class HTMLTag(Enum):
                 return HTMLTag.__from_allrecipes_tag(tag, attrs)
             case RecipeSource.SERIOUSEATS:
                 return HTMLTag.__from_seriouseats_tag(tag, attrs)
+            case RecipeSource.EPICURIOUS:
+                return HTMLTag.__from_epicurious_tag(tag, attrs)
         return HTMLTag.UNKNOWN
 
 class NounType(Enum):
