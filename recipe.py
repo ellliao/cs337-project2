@@ -1,6 +1,8 @@
 '''Recipe data representations.'''
 
+from copy import deepcopy
 from fractions import Fraction
+from util import nlp, NounType, str_to_fraction
 
 class Ingredient:
     '''Struct holding ingredient information'''
@@ -14,6 +16,54 @@ class Ingredient:
         '''Quantity of the ingredient, e.g. 1/2'''
         self.unit = unit
         '''Unit of the ingredient, e.g. tsp'''
+    
+    @classmethod
+    def from_str(cls, name: str):
+        ingr = Ingredient()
+        doc = nlp(name)
+        for chunk in doc.noun_chunks:
+
+            # Find quantity, if available
+            i = chunk.start
+            li = 0
+            if doc[i].text in ['a','an']:
+                ingr.quantity = str_to_fraction('1')
+                li += len(doc[i].text) + 1
+                i += 1
+            else:
+                quantity = []
+                has_quantity = False
+                while i < chunk.end:
+                    if doc[i].pos_ == 'NUM':
+                        has_quantity = True
+                        quantity.append(doc[i].text)
+                        li += len(doc[i].text) + 1
+                    elif has_quantity == True:
+                        break
+                    i += 1
+                if quantity:
+                    ingr.quantity = str_to_fraction(' '.join(quantity))
+                else:
+                    i = chunk.start
+
+            # Find unit, if available
+            if i < chunk.end and \
+                NounType.MEASURE in NounType.from_str(doc[i].text):
+                ingr.unit = doc[i].text
+                li += len(doc[i].text) + 1
+                i += 1
+            
+            # Find name
+            for j in range(i,chunk.end):
+                if NounType.FOOD in NounType.from_str(doc[j].text):
+                    ingr.name = chunk.text[li:]
+                    break
+
+            if ingr.name:
+                return ingr
+        
+        return ingr
+
 
 class IntermediateIngredient:
     '''Struct holding intermediate ingredient information, e.g. dough'''
@@ -30,9 +80,9 @@ class IngredientState:
     def __init__(self, remaining: list[Ingredient],
                  intermediate: list[IntermediateIngredient] = [],
                  focus: int = -1):
-        self.remaining: list[Ingredient] = remaining.copy()
+        self.remaining: list[Ingredient] = deepcopy(remaining)
         '''Remaining unused ingredients'''
-        self.intermediate: list[IntermediateIngredient] = intermediate.copy()
+        self.intermediate: list[IntermediateIngredient] = deepcopy(intermediate)
         '''Any intermediate collections of ingredients'''
         self.focus = focus
         '''Index of currently referenced intermediate ingredient'''

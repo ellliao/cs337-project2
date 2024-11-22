@@ -105,8 +105,9 @@ class NounType(Enum):
                 elif wn.synset('measure.n.02') in ss and \
                 NounType.MEASURE not in ntypes:
                     ntypes.append(NounType.MEASURE)
-                elif wn.synset('food.n.01') in ss and \
-                NounType.FOOD not in ntypes:
+                elif (wn.synset('food.n.01') in ss or \
+                      wn.synset('food.n.02') in ss) and \
+                        NounType.FOOD not in ntypes:
                     ntypes.append(NounType.FOOD)
                 elif (wn.synset('temperature.n.01') in ss or \
                       wn.synset('fire.n.03') in ss or \
