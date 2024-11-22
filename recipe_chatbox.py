@@ -461,8 +461,6 @@ def CI():
 
   context = Context()
   print("Welcome to Recipe Chatbox! Please enter the URL of the recipe you need assistance with.")
-
-  user_L = input("Input the Link here:") #user input here for link
   recipe = None
 
 
