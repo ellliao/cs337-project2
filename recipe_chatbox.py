@@ -41,14 +41,10 @@ def display_step(context):
 
     if context.current_step >= len(context.current_recipe.steps):
         print("/n Do you have any questions regarding this final step?")
-        print("You can press '2' for the list of ingredients, "
-              "'quit' to end the session, or ask any other questions "
-              "you have")
+        print(f"{shortcut_tip} or ask any other questions you have")
     else:
         print("Do you have any questions regarding this step?")
-        print("You can press '1' for the next step, '2' for the list of "
-              "ingredients, 'quit' to end the session, or ask any other "
-              "questions you have")
+        print(f"{shortcut_tip} or ask any other questions you have")
 
 def display_ingredients(context):
 
@@ -78,11 +74,26 @@ def display_ingredients(context):
 
     if context.current_step > 0:
         print("\nWould you like to go back to the steps, or do you have any other questions?")
-        print("You can press '1' for the next step, '2' for the list of ingredients or 'quit' to end the session or any other questions you have")
+        print(f"{shortcut_tip} or ask any other questions you have")
 
     else:
         print("\nWould you like to walk through the steps, or do you have any other questions?")
-        print("You can press '1' for the next step, '2' for the list of ingredients or 'quit' to end the session or any other questions you have")
+        print(f"{shortcut_tip} or ask any other questions you have")
+
+shortcuts = {
+    "shortcuts": "Display all avalable keyword shortcuts.",
+    "1": "Display the next step in current recipe.",
+    "2": "Display the current recipe's ingredients list.",
+    "quit": "End the Recipe Chatbox session.",
+    "new": "Start on a different recipe."
+}
+
+shortcut_tip = "Enter 'shortcuts' to view all available keyword shortcuts"
+
+def display_shortcuts():
+    print("Shortcuts:")
+    for shortcut in shortcuts:
+        print(f"  • '{shortcut}': {shortcuts[shortcut]}")
 
 ##########################
 # SEARCH QUERY FORMATION #
@@ -259,8 +270,7 @@ def handle_what(context, input_text):
         ]
 
     result_strings.append(
-        "You can press '1' for the next step, '2' for the list of ingredients, "
-        "or 'quit' to end the session or any other questions you have."
+        shortcut_tip
     )
 
     return "\n".join(result_strings)
@@ -301,8 +311,7 @@ def handle_how(context, input_text):
         ]
 
     result_strings.append(
-        "You can press '1' for the next step, '2' for the list of ingredients, "
-        "or 'quit' to end the session or any other questions you have."
+        ' '.join([shortcut_tip, "or ask any other questions you have."])
     )
     return "\n".join(result_strings)
 
@@ -509,14 +518,18 @@ def CI(new_session: bool = True):
   print("Would you like to:")
   print("1. Walk through the steps")
   print("2. Get the list of ingredients")
-  print("Type 'quit' to end the session, 'new' to start on a different "
-        "recipe, or ask any other requests.")
+  print("Enter 'shortcuts' to view all available keyword shortcuts, or ask "
+        "any other requests.")
 
   while True:
 
     user_prompt = input("You: ").strip().lower()
 
-    if user_prompt == "1":
+    if user_prompt == "shortcuts":
+        context.user_prompts.append("shortcuts")
+        display_shortcuts()
+
+    elif user_prompt == "1":
       context.user_prompts.append("1: Walk through the steps")
       display_step( context)
 
@@ -525,7 +538,7 @@ def CI(new_session: bool = True):
       display_ingredients(context)
 
     elif user_prompt == "quit" or \
-        re.findall(r'\b(?:end|stop)\b.*\b(?:session|program|script)\b'
+        re.findall(r'\b(?:end|stop|leave)\b.*\b(?:session|program|script)\b'
                    r'|\bquit\b|\bexit\b',
                    user_prompt, re.IGNORECASE):
       context.user_prompts.append("quit")
