@@ -505,7 +505,7 @@ def CI(new_session: bool = True):
       display_ingredients(context)
 
     elif user_prompt == "quit" or \
-        re.findall(r'\b(?:end|stop)(?: the)? (?:session|program|script)\b'
+        re.findall(r'\b(?:end|stop)\b.*\b(?:session|program|script)\b'
                    r'|\bquit\b|\bexit\b',
                    user_prompt, re.IGNORECASE):
       context.user_prompts.append("quit")
