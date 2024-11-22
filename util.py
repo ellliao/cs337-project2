@@ -22,11 +22,14 @@ class RecipeSource(Enum):
     '''Enum of recipe sources'''
     UNKNOWN = auto()
     ALLRECIPES = auto()
+    SERIOUSEATS = auto()
 
     @classmethod
     def from_url(cls, url: str):
         if re.findall(r'allrecipes\.com/recipe/.*', url):
             return RecipeSource.ALLRECIPES
+        elif re.findall(r'seriouseats.com/.*recipe', url):
+            return RecipeSource.SERIOUSEATS
         return RecipeSource.UNKNOWN
 
 class HTMLTag(Enum):
@@ -74,6 +77,37 @@ class HTMLTag(Enum):
             if ('class', 'comp mntl-sc-block mntl-sc-block-html') in attrs:
                 return HTMLTag.STEP
         return HTMLTag.UNKNOWN
+    
+    @classmethod
+    def __from_seriouseats_tag(cls, tag: str,
+                               attrs: list[tuple[str, str | None]]):
+        if tag == 'h1':
+            if attrs == [('class', 'heading__title')]:
+                return HTMLTag.TITLE
+        elif tag == 'span':
+            if attrs == [('class', 'meta-text__label')]:
+                return HTMLTag.OVERVIEW_LABEL
+            elif attrs == [('class', 'meta-text__data')]:
+                return HTMLTag.OVERVIEW_TEXT
+            elif attrs == [('data-ingredient-quantity', 'true')]:
+                return HTMLTag.INGREDIENT_QUANTITY
+            elif attrs == [('data-ingredient-unit', 'true')]:
+                return HTMLTag.INGREDIENT_UNIT
+            elif attrs == [('data-ingredient-name', 'true')]:
+                return HTMLTag.INGREDIENT_NAME
+        elif tag == 'section':
+            if ('class', 'comp section--ingredients section') in attrs:
+                return HTMLTag.INGREDIENTS_LIST
+            elif ('class', 'comp section--instructions section') \
+                    in attrs:
+                return HTMLTag.STEPS_LIST
+        elif tag == 'li':
+            if ('class', 'structured-ingredients__list-item') in attrs:
+                return HTMLTag.INGREDIENT
+        elif tag == 'p':
+            if ('class', 'comp mntl-sc-block mntl-sc-block-html') in attrs:
+                return HTMLTag.STEP
+        return HTMLTag.UNKNOWN
 
     @classmethod
     def from_tag(cls, source: RecipeSource, tag: str,
@@ -81,6 +115,8 @@ class HTMLTag(Enum):
         match source:
             case RecipeSource.ALLRECIPES:
                 return HTMLTag.__from_allrecipes_tag(tag, attrs)
+            case RecipeSource.SERIOUSEATS:
+                return HTMLTag.__from_seriouseats_tag(tag, attrs)
         return HTMLTag.UNKNOWN
 
 class NounType(Enum):
@@ -106,7 +142,8 @@ class NounType(Enum):
                 NounType.MEASURE not in ntypes:
                     ntypes.append(NounType.MEASURE)
                 elif (wn.synset('food.n.01') in ss or \
-                      wn.synset('food.n.02') in ss) and \
+                      wn.synset('food.n.02') in ss or \
+                      wn.synset('leaven.n.01') in ss) and \
                         NounType.FOOD not in ntypes:
                     ntypes.append(NounType.FOOD)
                 elif (wn.synset('temperature.n.01') in ss or \
@@ -125,7 +162,10 @@ def str_to_fraction(data: str):
     table = str.maketrans({u'⁄': '/'})
     data = unicodedata.normalize('NFKD', data).translate(table).split()
     for val in data:
-        sum += Fraction(val)
+        try:
+            sum += Fraction(val)
+        except:
+            continue
     return sum
 
 def fraction_to_str(frac: Fraction):

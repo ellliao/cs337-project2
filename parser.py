@@ -81,7 +81,8 @@ def parse_nouns(step: r.Step, doc) -> None:
         if u.NounType.TOOL in ntypes:
             step.tools.append(chunk.text)
         elif u.NounType.TEMPERATURE in ntypes or \
-            (chunk.end-chunk.start > 2 and doc[chunk.end-2].text == 'degrees'):
+            (chunk.end-chunk.start > 2 and \
+             doc[chunk.end-2].text in ['degrees','º']):
             step.temps.append(chunk.text.strip('().:,'))
         else:
             # Check if the referenced noun is an ingredient.
@@ -180,10 +181,13 @@ class RecipeHTMLParser(HTMLParser):
         self.source = source
         self.recipe = r.Recipe()
         self.current_tag = u.HTMLTag.UNKNOWN
+        self.prev_tag = u.HTMLTag.UNKNOWN
         self.current_section = u.HTMLTag.UNKNOWN
         super().__init__(convert_charrefs=convert_charrefs)
     
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag in ['i','b','strong']:
+            self.prev_tag = self.current_tag
         # Save the current tag
         self.current_tag = u.HTMLTag.from_tag(self.source, tag, attrs)
         match self.current_tag:
@@ -213,16 +217,25 @@ class RecipeHTMLParser(HTMLParser):
                     self.ingredient.unit = data.strip()
             case u.HTMLTag.INGREDIENT_NAME:
                 if self.current_section == u.HTMLTag.INGREDIENTS_LIST:
-                    self.ingredient.name = data.strip()
-                    self.recipe.ingredients.append(self.ingredient)
+                    ingr = r.Ingredient.from_str(data.strip(' \t\n,;.:()'))
+                    if self.ingredient.quantity:
+                        ingr.quantity = self.ingredient.quantity
+                    if self.ingredient.unit:
+                        ingr.unit = self.ingredient.unit
+                    if ingr.name:
+                        self.recipe.ingredients.append(ingr)
             case u.HTMLTag.STEP:
                 if self.current_section == u.HTMLTag.STEPS_LIST:
                     parse_and_add_step(data.strip(), self.recipe)
         return super().handle_data(data)
 
     def handle_endtag(self, tag: str) -> None:
-        # Reset tag
-        self.current_tag = u.HTMLTag.UNKNOWN
+        if tag in ['i','b','strong']:
+            self.current_tag = self.prev_tag
+            self.prev_tag = u.HTMLTag.UNKNOWN
+        else:
+            # Reset tag
+            self.current_tag = u.HTMLTag.UNKNOWN
         return super().handle_endtag(tag)
 
 ################
