@@ -18,9 +18,35 @@ class Ingredient:
         '''Unit of the ingredient, e.g. tsp'''
     
     @classmethod
-    def from_str(cls, name: str):
+    def from_str(cls, name: str, in_list: bool = False):
         ingr = Ingredient()
         doc = nlp(name)
+        if in_list:
+            # Find quantity, if available
+            i = 0
+            li = 0
+            quantity = []
+            while i < len(doc) and str_to_fraction(doc[i].text) != Fraction():
+                quantity.append(doc[i].text)
+                li += len(doc[i].text) + 1
+                i += 1
+            if quantity:
+                ingr.quantity = str_to_fraction(' '.join(quantity))
+            else:
+                i = 0
+
+            # Find unit, if available
+            if i < len(doc) and \
+                NounType.MEASURE in NounType.from_str(doc[i].text):
+                ingr.unit = doc[i].text
+                li += len(doc[i].text) + 1
+                i += 1
+            
+            # Find name
+            ingr.name = name[li:]
+
+            return ingr
+        
         for chunk in doc.noun_chunks:
 
             # Find quantity, if available

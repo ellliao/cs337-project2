@@ -14,6 +14,18 @@ from nltk.corpus import wordnet as wn
 
 nlp = spacy.load("en_core_web_md")
 
+unit_dict = dict([
+    ("ounce", r'\boz(?:\.|\b)'),
+    ("pound", r'\blb(?:\.|s\b|\b)'),
+    ("grams", r'\bg(?:\.|\b)'),
+    ("kilogram", r'\bkg(?:\.|s\b|\b)'),
+    ("teaspoon", r'\btsp(?:\.|s\b|\b)'),
+    ("tablespoon", r'\btbsp(?:\.|s\b|\b)'),
+    ("gallon", r'\bgal(?:\.|s\b|\b)'),
+    ("milliliters", r'\bml(?:\.|\b)'),
+    ("liter", r'\bl(?:\.|\b)')
+])
+
 #########
 # ENUMS #
 #########
@@ -220,6 +232,12 @@ class NounType(Enum):
 # FUNCTIONS #
 #############
 
+def standardize_units(string: str):
+    "Un-abbreviate all cooking units in a given string"
+    for unit in unit_dict:
+        string = re.sub(unit_dict[unit], unit, string, flags=re.IGNORECASE)
+    return string
+
 def str_to_fraction(data: str):
     sum = Fraction()
     table = str.maketrans({u'⁄': '/'})
@@ -228,9 +246,9 @@ def str_to_fraction(data: str):
         try:
             f = Fraction(val)
             if f.denominator > 1 and f.numerator > 10:
-                f.numerator = f.numerator % 10 + \
-                    int(f.numerator / 10) * f.denominator
-            sum += Fraction(val)
+                f = Fraction(f.numerator % 10 + \
+                    int(f.numerator / 10) * f.denominator, f.denominator)
+            sum += f
         except:
             continue
     return sum

@@ -6,6 +6,7 @@ import requests
 import util as u
 
 from html.parser import HTMLParser
+from nltk.tokenize import sent_tokenize
 
 ####################
 # HELPER FUNCTIONS #
@@ -113,7 +114,10 @@ def parse_and_add_step(instr: str, recipe: r.Recipe) -> None:
     '''Parses an instruction into maybe more steps and adds to recipe.'''
 
     # Split recipe instruction into "sentences" for SpaCy parser
-    steps = re.split(r'(?:\.|;|, then)\s+', instr)
+    sents = sent_tokenize(instr)
+    steps = []
+    for sent in sents:
+        steps.extend(re.split(r'(?:;|, then)\s+', sent))
 
     for text in steps:
         text = text.strip()
@@ -224,16 +228,18 @@ class RecipeHTMLParser(HTMLParser):
                     self.ingredient.quantity = u.str_to_fraction(data.strip())
             case u.HTMLTag.INGREDIENT_UNIT:
                 if self.current_section == u.HTMLTag.INGREDIENTS_LIST:
-                    self.ingredient.unit = data.strip()
+                    self.ingredient.unit = u.standardize_units(data.strip())
             case u.HTMLTag.INGREDIENT_NAME:
                 if self.current_section == u.HTMLTag.INGREDIENTS_LIST:
-                    ingr = r.Ingredient.from_str(data.strip(' \t\n,;.:()'))
-                    if self.ingredient.quantity:
-                        ingr.quantity = self.ingredient.quantity
-                    if self.ingredient.unit:
-                        ingr.unit = self.ingredient.unit
+                    ingr = r.Ingredient.from_str(
+                        u.standardize_units(data.strip(' \t\n,;.:()')), True)
+                    if not self.ingredient.quantity:
+                        self.ingredient.quantity = ingr.quantity
+                    if not self.ingredient.unit:
+                        self.ingredient.unit = ingr.unit
                     if ingr.name:
-                        self.recipe.ingredients.append(ingr)
+                        self.ingredient.name = ingr.name
+                        self.recipe.ingredients.append(self.ingredient)
             case u.HTMLTag.STEP:
                 if self.current_section == u.HTMLTag.STEPS_LIST:
                     self.text = ' '.join([self.text, data.strip()])
@@ -243,7 +249,7 @@ class RecipeHTMLParser(HTMLParser):
         if tag in ['i','b','strong']:
             return super().handle_endtag(tag)
         if self.current_tag == u.HTMLTag.STEP:
-            parse_and_add_step(self.text, self.recipe)
+            parse_and_add_step(u.standardize_units(self.text), self.recipe)
         # Reset tag
         self.current_tag = u.HTMLTag.UNKNOWN
         return super().handle_endtag(tag)
