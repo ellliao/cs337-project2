@@ -7,6 +7,10 @@ from enum import Enum, auto
 from fractions import Fraction
 from nltk.corpus import wordnet as wn
 
+#########
+# ENUMS #
+#########
+
 class RecipeSource(Enum):
     '''Enum of recipe sources'''
     UNKNOWN = auto()
@@ -87,6 +91,10 @@ class NounType(Enum):
                     wn.synset('container.n.01') in ss:
                     return NounType.TOOL
         return NounType.UNKNOWN
+
+#############
+# FUNCTIONS #
+#############
 
 def str_to_fraction(data: str):
     sum = Fraction()
