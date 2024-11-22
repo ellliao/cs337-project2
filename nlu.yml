@@ -14,6 +14,11 @@ nlu:
       - For more details, visit: https://www.youtube.com/results search_query=how+to+cook+bake+in+the+context+of+cooking
       - For more details, visit: https://www.youtube.com/results?search_query=how+to+cook+in+the+context+of+cooking
 
+  - intent: next_step
+    examples: |
+      - Step 1: Lay eggplant slices on paper towels.
+      - Step 2: Sprinkle lightly with salt.
+      - Step 3: Let sit for 30 minutes to draw out moisture.
 
   - intent: greet
     examples: |
