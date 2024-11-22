@@ -24,7 +24,7 @@ class Context:
 def display_step(context):
 
     if context.current_step >= len(context.current_recipe.steps):
-        print("Sorry, we have gonee through all the steps")
+        print("Sorry, we have gone through all the steps")
 
     if context.current_step == len(context.current_recipe.steps) - 1:
         step_text = f"Final Step: {context.current_recipe.steps[context.current_step]}"
@@ -39,10 +39,14 @@ def display_step(context):
 
     if context.current_step >= len(context.current_recipe.steps):
         print("/n Do you have any questions regarding this final step?")
-        print("You can press '2' for the list of ingredients, or 'quit' to end the session or any other questions you have")
+        print("You can press '2' for the list of ingredients, "
+              "'quit' to end the session, or ask any other questions "
+              "you have")
     else:
         print("Do you have any questions regarding this step?")
-        print("You can press '1' for the next step, '2' for the list of ingredients, or 'quit' to end the session or any other questions you have")
+        print("You can press '1' for the next step, '2' for the list of "
+              "ingredients, 'quit' to end the session, or ask any other "
+              "questions you have")
 
 def display_ingredients(context):
 
@@ -457,17 +461,17 @@ def handle_input(context, user_input):
 # INTERFACE #
 #############
 
-def CI():
+def CI(new_session: bool = True):
 
   context = Context()
-  print("Welcome to Recipe Chatbox! Please enter the URL of the recipe you need assistance with.")
+  if new_session:
+    print("Welcome to Recipe Chatbox! ", end='')
+  print("Please enter the URL of the recipe you need assistance with.")
   recipe = None
-
-
 
   while (not recipe ):
 
-        user_L = input("Input the Link here:") #user input here for link
+        user_L = input("Input the Link here: ") #user input here for link
         print(user_L)
 
 
@@ -485,7 +489,8 @@ def CI():
   print("Would you like to:")
   print("1. Walk through the steps")
   print("2. Get the list of ingredients")
-  print("Type 'quit' to end the session, or ask any other requests.")
+  print("Type 'quit' to end the session, 'new' to start on a different "
+        "recipe, or ask any other requests.")
 
   while True:
 
@@ -499,10 +504,19 @@ def CI():
       context.user_prompts.append("2: Get the list of ingredients")
       display_ingredients(context)
 
-    elif user_prompt == "quit":
+    elif user_prompt == "quit" or \
+        re.findall(r'\b(?:end|stop)(?: the)? (?:session|program|script)\b'
+                   r'|\bquit\b|\bexit\b',
+                   user_prompt, re.IGNORECASE):
       context.user_prompts.append("quit")
       print("Thank you for using the Recipe Chatbox. Have a great day!")
       break
+
+    elif user_prompt == "new" or \
+        re.findall(r'\b(?:new|another|different) recipe\b',
+                   user_prompt, re.IGNORECASE):
+        CI(False)
+        return
 
 
     else:
