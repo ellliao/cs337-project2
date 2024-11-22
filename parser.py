@@ -198,6 +198,9 @@ class RecipeHTMLParser(HTMLParser):
             case u.HTMLTag.INGREDIENT:
                 if self.current_section == u.HTMLTag.INGREDIENTS_LIST:
                     self.ingredient = r.Ingredient()
+            case u.HTMLTag.INGREDIENT_QUANTITY:
+                if self.ingredient.name:
+                    self.ingredient = r.Ingredient()
             case u.HTMLTag.INGREDIENT_NAME:
                 if self.ingredient.name:
                     self.ingredient = r.Ingredient()

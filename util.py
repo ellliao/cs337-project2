@@ -24,6 +24,7 @@ class RecipeSource(Enum):
     ALLRECIPES = auto()
     SERIOUSEATS = auto()
     EPICURIOUS = auto()
+    BONAPPETIT = auto()
 
     @classmethod
     def from_url(cls, url: str):
@@ -33,6 +34,8 @@ class RecipeSource(Enum):
             return RecipeSource.SERIOUSEATS
         elif re.findall(r'epicurious\.com/recipes/.*', url):
             return RecipeSource.EPICURIOUS
+        elif re.findall(r'bonappetit\.com/recipe/.*', url):
+            return RecipeSource.BONAPPETIT
         return RecipeSource.UNKNOWN
 
 class HTMLTag(Enum):
@@ -136,6 +139,34 @@ class HTMLTag(Enum):
             elif ('data-testid', 'InstructionsWrapper') in attrs:
                 return HTMLTag.STEPS_LIST
         return HTMLTag.UNKNOWN
+    
+    @classmethod
+    def __from_bonappetit_tag(cls, tag: str,
+                              attrs: list[tuple[str, str | None]]):
+        if tag == 'h1':
+            if ('data-testid', 'ContentHeaderHed') in attrs:
+                return HTMLTag.TITLE
+        elif tag == 'p':
+            if attrs == [('class', 'BaseWrap-sc-gjQpdd BaseText-ewhhUZ'
+                          ' InfoSliceKey-gHIvng iUEiRd gmMvZM hykkRA')]:
+                return HTMLTag.OVERVIEW_LABEL
+            elif attrs == [('class', 'BaseWrap-sc-gjQpdd BaseText-ewhhUZ'
+                            ' InfoSliceValue-tfmqg iUEiRd hjxWdt fkSlPp')]:
+                return HTMLTag.OVERVIEW_TEXT
+            elif attrs == [('class', 'BaseWrap-sc-gjQpdd BaseText-ewhhUZ'
+                            ' Amount-hYcAMN iUEiRd gMBhLy hoAJEl')]:
+                return HTMLTag.INGREDIENT_QUANTITY
+            else:
+                return HTMLTag.STEP
+        elif tag == 'div':
+            if ('data-testid', 'IngredientList') in attrs:
+                return HTMLTag.INGREDIENTS_LIST
+            elif attrs == [('class', 'BaseWrap-sc-gjQpdd BaseText-ewhhUZ'
+                            ' Description-cSrMCf iUEiRd gMBhLy fsKnGI')]:
+                return HTMLTag.INGREDIENT_NAME
+            elif ('data-testid', 'InstructionsWrapper') in attrs:
+                return HTMLTag.STEPS_LIST
+        return HTMLTag.UNKNOWN
 
     @classmethod
     def from_tag(cls, source: RecipeSource, tag: str,
@@ -147,6 +178,8 @@ class HTMLTag(Enum):
                 return HTMLTag.__from_seriouseats_tag(tag, attrs)
             case RecipeSource.EPICURIOUS:
                 return HTMLTag.__from_epicurious_tag(tag, attrs)
+            case RecipeSource.BONAPPETIT:
+                return HTMLTag.__from_bonappetit_tag(tag, attrs)
         return HTMLTag.UNKNOWN
 
 class NounType(Enum):
@@ -193,6 +226,10 @@ def str_to_fraction(data: str):
     data = unicodedata.normalize('NFKD', data).translate(table).split()
     for val in data:
         try:
+            f = Fraction(val)
+            if f.denominator > 1 and f.numerator > 10:
+                f.numerator = f.numerator % 10 + \
+                    int(f.numerator / 10) * f.denominator
             sum += Fraction(val)
         except:
             continue
