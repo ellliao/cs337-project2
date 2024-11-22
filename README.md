@@ -84,7 +84,9 @@ For more details, visit: https://www.google.com/search?q=what+is+fork?+in+the+co
 Enter 'shortcuts' to view all available keyword shortcuts
 ```
 
-Asking about the parameters of the current step ("How much of <ingredient> do I need?", "What temperature?", "How long do I <specific technique>?", "When is it done?", "What can I use instead of <ingredient or tool>")
-
+Asking about the parameters of the current step:
+```
+"How much of <ingredient> do I need?", "What temperature?", "How long do I <specific technique>?", "When is it done?", "What can I use instead of <ingredient or tool>"
+```
 ## GitHub repository
 [https://github.com/ellliao/cs337-project1.git](https://github.com/ellliao/cs337-project2.git)
