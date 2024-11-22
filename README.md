@@ -17,7 +17,7 @@ To download the required packages for this project, run the following command fr
 pip install -r requirements.txt
 ```
 
-## Running Recipe Chatbox
+## Running the Recipe Chatbox
 
 To activate the chatbot, run the following command from within the project directory:
 ```
