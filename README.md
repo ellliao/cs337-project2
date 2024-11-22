@@ -2,41 +2,64 @@
 CS 337 Project 2: An interactive recipe chatbot.
 
 ##Instructions on pip install file
-- For recipe_chatbox.py:
+For recipe_chatbox.py:
 
-1: !python -m spacy download en_core_web_md
+- !python -m spacy download en_core_web_md
 
-2: !pip install nltk
+- !pip install nltk
 
 ##Packages Import
-- For recipe_chatbox.py:
+For recipe_chatbox.py:
 
-1: import nltk
+- import nltk
 
-2: nltk.download('punkt_tab')
+- nltk.download('punkt_tab')
 
-3: import re
+- import re
 
-4: import util as u
+- import util as u
 
-5: from parser import get_recipe_from_url
+- from parser import get_recipe_from_url
 
-- For recipe_chatbox_testing.ipynb:
+For recipe_chatbox_testing.ipynb:
 
-1: import recipe_chatbox as rc
-2: from parser import get_recipe_from_url
+- import recipe_chatbox as rc
+ 
+- from parser import get_recipe_from_url
+
+For recipe.py:
+
+- from copy import deepcopy
+  
+- from fractions import Fraction
+  
+- from util import nlp, NounType, str_to_fraction
+
+For util.py:
+
+- import re
+
+- import spacy
+
+- import unicodedata
+
+- from enum import Enum, auto
+
+- from fractions import Fraction
+
+- from nltk.corpus import wordnet as wn
 
 ##Files input
--recipe_chatbox.py:
+recipe_chatbox.py:
 
-1.util.py
+- util.py
 
-2.parser.py
+- parser.py
 
--recipe_chatbox_testing:
+recipe_chatbox_testing:
 
-1.recipe_chatbox.py
+- recipe_chatbox.py
 
-2.parser.py
+- parser.py
  
 ##GitHub repository [https://github.com/ellliao/cs337-project1.git](https://github.com/ellliao/cs337-project2.git)
