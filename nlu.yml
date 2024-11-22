@@ -9,6 +9,12 @@ nlu:
       - 1 pound lean ground beef
       - 2 onions, chopped
 
+  - intent: how_q
+    examples: |
+      - For more details, visit: https://www.youtube.com/results search_query=how+to+cook+bake+in+the+context+of+cooking
+      - For more details, visit: https://www.youtube.com/results?search_query=how+to+cook+in+the+context+of+cooking
+
+
   - intent: greet
     examples: |
       - hi
