@@ -1,5 +1,11 @@
-from enum import Enum, auto
+'''Utility enums and functions for recipe parsing and display.'''
+
 import re
+import unicodedata
+
+from enum import Enum, auto
+from fractions import Fraction
+from nltk.corpus import wordnet as wn
 
 class RecipeSource(Enum):
     '''Enum of recipe sources'''
@@ -27,7 +33,8 @@ class HTMLTag(Enum):
     STEP = auto()
 
     @classmethod
-    def __from_allrecipes_tag(cls, tag: str, attrs: list[tuple[str, str | None]]):
+    def __from_allrecipes_tag(cls, tag: str,
+                              attrs: list[tuple[str, str | None]]):
         if tag == 'h1':
             if attrs == [('class', 'article-heading text-headline-400')]:
                 return HTMLTag.TITLE
@@ -58,7 +65,8 @@ class HTMLTag(Enum):
         return HTMLTag.UNKNOWN
 
     @classmethod
-    def from_tag(cls, source: RecipeSource, tag: str, attrs: list[tuple[str, str | None]]):
+    def from_tag(cls, source: RecipeSource, tag: str,
+                 attrs: list[tuple[str, str | None]]):
         match source:
             case RecipeSource.ALLRECIPES:
                 return HTMLTag.__from_allrecipes_tag(tag, attrs)
@@ -68,3 +76,32 @@ class NounType(Enum):
     '''Enum of relevant noun types'''
     UNKNOWN = auto()
     TOOL = auto()
+
+    @classmethod
+    def from_str(cls, noun: str):
+        sets = wn.synsets(noun, wn.NOUN)
+        for s in sets:
+            for ss in s.hypernym_paths():
+                if wn.synset('kitchen_utensil.n.01') in ss or \
+                    wn.synset('kitchen_appliance.n.01') in ss or \
+                    wn.synset('container.n.01') in ss:
+                    return NounType.TOOL
+        return NounType.UNKNOWN
+
+def str_to_fraction(data: str):
+    sum = Fraction()
+    table = str.maketrans({u'⁄': '/'})
+    data = unicodedata.normalize('NFKD', data).translate(table).split()
+    for val in data:
+        sum += Fraction(val)
+    return sum
+
+def fraction_to_str(frac: Fraction):
+    if frac.denominator == 1:
+        return str(frac.numerator)
+    elif frac.numerator >= frac.denominator:
+        return ' '.join([str(frac.numerator // frac.denominator),
+                         str(Fraction(frac.numerator % frac.denominator,
+                                      frac.denominator))])
+    else:
+        return str(frac)
