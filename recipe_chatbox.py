@@ -1,5 +1,6 @@
 '''The main chatbot'''
-
+import nltk
+nltk.download('punkt_tab')
 import re
 import util as u
 
