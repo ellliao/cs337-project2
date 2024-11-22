@@ -59,7 +59,7 @@ def display_ingredients(context):
 
             print(
             '  • ',
-            ingr.quantity if ingr.quantity else '',
+            u.fraction_to_str(ingr.quantity) if ingr.quantity else '',
             ' ' if ingr.quantity else '',
             ingr.unit if ingr.unit else '',
             ' ' if ingr.unit else '',
