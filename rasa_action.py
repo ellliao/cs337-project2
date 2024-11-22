@@ -1,3 +1,6 @@
+from rasa_sdk import Action
+from rasa_sdk.events import SlotSet
+
 class ActionRasaCook(Action):
     def name(self):
         return "action_rasa_cook"
