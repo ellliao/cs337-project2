@@ -7,19 +7,23 @@ Original file is located at
     https://colab.research.google.com/drive/13ZpVbutd9dR6AU2af5fkznb7bgWBo8DX
 """
 
-from rasa_sdk import Action
-from rasa_sdk.events import SlotSet
-
-class ActionCooking(Action):
+class ActionRasaCook(Action):
     def name(self):
-        return "ActionCooking"
+        return "action_rasa_cook"
 
     def run(self, dispatcher, tracker, domain):
-        if recipe:
-            description = ', '.join(recipe.ingredients)
-            dispatcher.utter_message(text=f"Cooking name is {recipe.title}.")
-            dispatcher.utter_message(text=f"Ingredient Content is {description}")
-            return [SlotSet("recipe", recipe)]
-        else:
-            dispatcher.utter_message(text="Sorry, I can't find Link.")
-            return []
+
+        intent = tracker.latest_message["intent"].get("name")
+
+        if intent == "ingredients":
+            return [SlotSet("ingredients", True)]
+
+        elif intent == "how_q":
+            return [SlotSet("how_q", True)]
+
+        elif intent == "next_step":
+            return [SlotSet("next_step", True)]
+
+        elif intent == "deny":
+            return [SlotSet("deny", False)]
+        return []
