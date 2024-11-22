@@ -3,6 +3,7 @@
 import re
 import util as u
 
+from nltk.corpus import wordnet as wn
 from parser import get_recipe_from_url
 
 ###########
@@ -378,13 +379,25 @@ def handle_navigations(context, user_input):
         if token.pos_ == "VERB":
             action = token.lemma_
             break
-
-    # Determine the intent based on the verb
-    if action == "repeat":
-        repeat_step( context)
+    if not action:
+        print("Sorry, I didn't understand that.")
         return
 
-    if action in ["go", "take"]:
+    # Determine the intent based on the verb
+    synsets = wn.synsets(action, wn.VERB)
+    hypernyms = []
+    for synset in synsets:
+        for path in synset.hypernym_paths():
+            hypernyms.extend(path)
+
+    if wn.synset('repeat.v.01') in hypernyms or \
+        (wn.synset('tell.v.02') in hypernyms and \
+         re.findall(r'\bagain\b', user_input, re.IGNORECASE)):
+        repeat_step(context)
+        return
+
+    if wn.synset('travel.v.01') in hypernyms or \
+        wn.synset('travel.v.02') in hypernyms:
         # Check for "go back", "previous", or "back"
         if any(word in user_input for word in ["back", "previous"]):
             step_number = None
@@ -453,6 +466,12 @@ def handle_input(context, user_input):
     if contains_how(user_input):
         result = handle_how(context, user_input)
         print(result)
+        return
+    
+
+    if re.findall(r'\bthank(?:\b|s\b)|\bappreciate\b.*(?:you|help)',
+                  user_input, re.IGNORECASE):
+        print("You're welcome :)")
         return
 
     handle_navigations(context, user_input)
