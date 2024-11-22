@@ -452,18 +452,18 @@ def handle_input(context, user_input):
 
     if contains_ingredient(user_input):
 
-        display_ingredients(context)
+        print(display_ingredients(context))
         return
 
     if is_temperature_related(user_input):
 
-        handle_temperature(context)
+        print(handle_temperature(context))
         return
     if is_amount_related(user_input):
-        handle_amount(context, user_input)
+        print(handle_amount(context, user_input))
         return
     if is_duration_related(user_input):
-        handle_duration(context)
+        print(handle_duration(context))
         return
 
 
