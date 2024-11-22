@@ -71,5 +71,20 @@ Enter "How do I <specific technique>?", it will provide a youtube video to teach
 You: how do I crush garlic
 For more details, visit: https://www.youtube.com/results?search_query=how+do+i+crush+garlic+in+the+context+of+cooking
 ```
+
+Navigation utterances enter:
+```
+"Go back one step", "Go to the next step", "Repeat please", "Take me to the 1st step", "Take me to the n-th step")
+```
+
+Enter "what is" questions ("What is a <tool being mentioned>?"):
+```
+You: what is fork?
+For more details, visit: https://www.google.com/search?q=what+is+fork?+in+the+context+of+cooking
+Enter 'shortcuts' to view all available keyword shortcuts
+```
+
+Asking about the parameters of the current step ("How much of <ingredient> do I need?", "What temperature?", "How long do I <specific technique>?", "When is it done?", "What can I use instead of <ingredient or tool>")
+
 ## GitHub repository
 [https://github.com/ellliao/cs337-project1.git](https://github.com/ellliao/cs337-project2.git)
